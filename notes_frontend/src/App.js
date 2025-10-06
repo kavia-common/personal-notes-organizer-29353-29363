@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useCallback, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
 import './App.css';
 import './theme.css';
 import Sidebar from './components/Sidebar';
 import Toolbar from './components/Toolbar';
 import Editor from './components/Editor';
 import useLocalNotes from './hooks/useLocalNotes';
+import { registerShortcuts } from './utils/shortcuts';
 
 /**
  * PUBLIC_INTERFACE
@@ -35,11 +36,45 @@ function App() {
 
   // Optional loading state (simple shimmer classnames are referenced via App.css)
   const [hydrated, setHydrated] = useState(false);
+  // Refs to manage a11y-focused elements after actions
+  const titleInputRef = useRef(null);
+  const contentTextareaRef = useRef(null);
+
   useEffect(() => {
     // Mark as hydrated after first render tick
     const t = setTimeout(() => setHydrated(true), 0);
     return () => clearTimeout(t);
   }, []);
+
+  // Register global keyboard shortcuts (Cmd/Ctrl+N, Cmd/Ctrl+S)
+  useEffect(() => {
+    // Create a stable save handler referencing latest selectedNote
+    const saveCurrentNote = () => {
+      if (!selectedNoteId || !selectedNote) return;
+      updateNote(selectedNoteId, {
+        title: selectedNote.title,
+        content: selectedNote.content,
+      });
+    };
+
+    // After creating a new note, focus the title input if present, else content
+    const getFocusTarget = () => titleInputRef.current || contentTextareaRef.current || null;
+
+    const unsubscribe = registerShortcuts({
+      onNew: () => {
+        const id = createNote();
+        if (typeof window !== 'undefined') {
+          window.location.hash = `#/note/${encodeURIComponent(id)}`;
+        }
+      },
+      onSave: saveCurrentNote,
+      focusAfterNew: getFocusTarget(),
+    });
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [createNote, selectedNote, selectedNoteId, updateNote]);
 
   // Hash-based routing helpers
   const selectByHash = useCallback(() => {
@@ -123,6 +158,16 @@ function App() {
     },
     [selectedNoteId, updateNote]
   );
+
+  // Resolve focusable editor controls once the editor is rendered
+  useEffect(() => {
+    // Defer to next tick to ensure DOM nodes exist
+    const t = setTimeout(() => {
+      titleInputRef.current = document.getElementById('note-title');
+      contentTextareaRef.current = document.getElementById('note-content');
+    }, 0);
+    return () => clearTimeout(t);
+  }, [hasNote, selectedNoteId]);
 
   // Disabled states
   const hasNote = Boolean(selectedNoteId && selectedNote);
