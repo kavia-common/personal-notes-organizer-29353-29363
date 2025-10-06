@@ -1,0 +1,87 @@
+@import '../theme.css';
+
+.Toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  background:var(--color-surface);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow-sm);
+  border:1px solid #eef2f7;
+}
+
+.Toolbar__left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.Toolbar__right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Buttons */
+.Toolbar__saveBtn{
+  /* use primary from theme.css via .btn base */
+}
+
+.Toolbar__deleteBtn{
+  background: var(--color-error);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.25);
+}
+
+.Toolbar__deleteBtn:disabled,
+.Toolbar__deleteBtn[aria-disabled="true"]{
+  opacity:.6;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:none;
+}
+
+/* Last saved */
+.Toolbar__savedStatus{
+  margin-left:8px;
+  font-size:13px;
+  color:#6b7280; /* gray-500 */
+  white-space:nowrap;
+}
+
+/* Theme toggle button */
+.Toolbar__themeToggle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:linear-gradient(180deg, #ffffff, #f9fafb);
+  border-color:#e5e7eb;
+  color:var(--color-text);
+  border-radius:10px;
+}
+
+.Toolbar__themeToggle:hover{
+  background:#f3f4f6;
+}
+
+.Toolbar__themeToggle:focus-visible{
+  outline:none;
+  box-shadow: var(--focus);
+}
+
+.Toolbar__themeIcon{
+  font-size:16px;
+  line-height:1;
+}
+
+.Toolbar__themeText{
+  font-weight:600;
+  font-size:13px;
+  color:#374151; /* gray-700 */
+}
+
+/* Keyboard navigation hint focus on entire toolbar */
+.Toolbar:focus-within{
+  box-shadow: var(--shadow-sm), var(--focus);
+}
